@@ -2,6 +2,7 @@ using System.Text;
 using FluentValidation;
 using WebParser.Models;
 using System.Security.Cryptography;
+using AngleSharp.Html.Parser;
 
 namespace WebParser.Services;
 
@@ -100,6 +101,24 @@ public class Service
         }
 
         response.DecryptedPlainText = decryptedText;
+        
+        var parser = new HtmlParser();
+        var document = parser.ParseDocument(decodedPage);
+
+        var elements = document.QuerySelectorAll(request.Selector);
+
+        var elementsAttrList = new List<string>();
+        var elementsHtmlList = new List<string>();
+
+        foreach (var element in elements)
+        {
+            var attrValue = element.GetAttribute(request.Attribute);
+            elementsAttrList.Add(attrValue ?? string.Empty);
+            elementsHtmlList.Add(element.OuterHtml);
+        }
+
+        response.ElementsCount = elementsAttrList.Count;
+        response.ElementsAttrList = elementsAttrList;
         
         return Task.FromResult(response);
     }
