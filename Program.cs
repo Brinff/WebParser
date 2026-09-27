@@ -1,9 +1,13 @@
 using WebParser.Services;
+using FluentValidation;
+using WebParser.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddScoped<Service>();
+
+builder.Services.AddValidatorsFromAssemblyContaining<ProcessRequestValidator>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
