@@ -9,11 +9,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12"/>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Controllers\" />
-      <Folder Include="Services\" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
     </ItemGroup>
 
 </Project>
