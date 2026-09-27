@@ -3,16 +3,23 @@ using FluentValidation;
 using WebParser.Models;
 using System.Security.Cryptography;
 using AngleSharp.Html.Parser;
+using Microsoft.Extensions.Configuration;
+using Dapper;
+using Npgsql;
+using System.Linq;
 
 namespace WebParser.Services;
 
 public class Service
 {
     private readonly IValidator<RequestModel> _validator;
+    private readonly string _connectionString;
 
-    public Service(IValidator<RequestModel> validator)
+    public Service(IValidator<RequestModel> validator, IConfiguration configuration)
     {
         _validator = validator;
+        _connectionString = configuration.GetConnectionString("Postgres") 
+                            ?? throw new InvalidOperationException("Connection string 'Postgres' not found");
     }
 
     public Task<ResponseModel> ProcessAsync(RequestModel request)
@@ -123,6 +130,33 @@ public class Service
         var emailsList = EmailExtractor.ExtractEmails(decodedPage);
         response.EmailsCount = emailsList.Count;
         response.EmailsList = emailsList;
+        
+        try
+        {
+            using var connection = new NpgsqlConnection(_connectionString);
+            connection.Open();
+
+            connection.Execute(@"
+                CREATE TABLE IF NOT EXISTS elements (
+                    id BIGSERIAL PRIMARY KEY,
+                    attribute_value TEXT,
+                    html_content TEXT
+                );");
+
+            var recordsToInsert = elementsAttrList
+                .Zip(elementsHtmlList, (attrValue, html) => new { AttributeValue = attrValue, HtmlContent = html })
+                .ToList();
+
+            connection.Execute(
+                "INSERT INTO elements (attribute_value, html_content) VALUES (@AttributeValue, @HtmlContent)",
+                recordsToInsert);
+        }
+        catch (NpgsqlException)
+        {
+            response.IsError = 1;
+            response.ErrorCode = "DATABASE_ERROR";
+            return Task.FromResult(response);
+        }
         
         return Task.FromResult(response);
     }

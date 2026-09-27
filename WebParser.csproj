@@ -9,8 +9,10 @@
 
     <ItemGroup>
         <PackageReference Include="AngleSharp" Version="1.8.3-beta.762" />
+        <PackageReference Include="Dapper" Version="2.1.89" />
         <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12"/>
+        <PackageReference Include="Npgsql" Version="10.0.3" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
     </ItemGroup>
 
