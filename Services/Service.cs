@@ -22,7 +22,7 @@ public class Service
                             ?? throw new InvalidOperationException("Connection string 'Postgres' not found");
     }
 
-    public Task<ResponseModel> ProcessAsync(RequestModel request)
+    public async Task<ResponseModel> ProcessAsync(RequestModel request)
     {
         var response = new ResponseModel
         {
@@ -45,7 +45,7 @@ public class Service
                 response.IsError = 1;
                 response.ErrorCode = "VALIDATION_ERROR";
                 response.ErrorMessage = string.Join("; ", validationResult.Errors.Select(e => e.ErrorMessage));
-                return Task.FromResult(response);
+                return response;
             }
 
             string decodedUrl;
@@ -58,7 +58,7 @@ public class Service
             {
                 response.IsError = 1;
                 response.ErrorCode = "URL_BASE64_DECODE_ERROR";
-                return Task.FromResult(response);
+                return response;
             }
 
             string decodedPage;
@@ -71,7 +71,7 @@ public class Service
             {
                 response.IsError = 1;
                 response.ErrorCode = "PAGE_BASE64_DECODE_ERROR";
-                return Task.FromResult(response);
+                return response;
             }
 
             response.Url = decodedUrl;
@@ -87,7 +87,7 @@ public class Service
             {
                 response.IsError = 1;
                 response.ErrorCode = "AES_BASE64_DECODE_ERROR";
-                return Task.FromResult(response);
+                return response;
             }
 
             string decryptedText;
@@ -106,7 +106,7 @@ public class Service
             {
                 response.IsError = 1;
                 response.ErrorCode = "DECRYPTION_ERROR";
-                return Task.FromResult(response);
+                return response;
             }
 
             response.DecryptedPlainText = decryptedText;
@@ -136,9 +136,9 @@ public class Service
             try
             {
                 using var connection = new NpgsqlConnection(_connectionString);
-                connection.Open();
+                connection.OpenAsync();
 
-                connection.Execute(@"
+                connection.ExecuteAsync(@"
                     CREATE TABLE IF NOT EXISTS elements (
                         id BIGSERIAL PRIMARY KEY,
                         attribute_value TEXT,
@@ -149,7 +149,7 @@ public class Service
                     .Zip(elementsHtmlList, (attrValue, html) => new { AttributeValue = attrValue, HtmlContent = html })
                     .ToList();
 
-                connection.Execute(
+                connection.ExecuteAsync(
                     "INSERT INTO elements (attribute_value, html_content) VALUES (@AttributeValue, @HtmlContent)",
                     recordsToInsert);
             }
@@ -157,17 +157,17 @@ public class Service
             {
                 response.IsError = 1;
                 response.ErrorCode = "DATABASE_ERROR";
-                return Task.FromResult(response);
+                return response;
             }
 
-            return Task.FromResult(response);
+            return response;
         }
         catch (Exception ex)
         {
             response.IsError = 1;
             response.ErrorCode = "UNKNOWN_ERROR";
             response.ErrorMessage = ex.Message;
-            return Task.FromResult(response);
+            return response;
         }
     }
 }
