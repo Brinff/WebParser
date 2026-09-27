@@ -10,12 +10,14 @@
     ports:
       - "5433:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
     networks:
       - webparser_network
 
   pgadmin:
-    image: dpage/pgadmin4:latest
+    build:
+      context: ./pgadmin
+      dockerfile: Dockerfile
     container_name: webparser_pgadmin
     restart: unless-stopped
     environment:
@@ -27,13 +29,6 @@
       - "8080:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
-      - ./pgadmin/servers.json:/pgadmin4/servers.json
-      - ./pgadmin/pgpass:/pgpass
-    entrypoint: >
-      /bin/sh -c "
-      chmod 600 /pgpass;
-      /entrypoint.sh
-      "
     depends_on:
       - postgres
     networks:
@@ -48,6 +43,8 @@
     working_dir: /app
     volumes:
       - .:/app
+      - /app/bin
+      - /app/obj
     ports:
       - "8090:8080"
     environment:

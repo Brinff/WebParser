@@ -136,9 +136,9 @@ public class Service
             try
             {
                 using var connection = new NpgsqlConnection(_connectionString);
-                connection.OpenAsync();
+                await connection.OpenAsync();
 
-                connection.ExecuteAsync(@"
+                await connection.ExecuteAsync(@"
                     CREATE TABLE IF NOT EXISTS elements (
                         id BIGSERIAL PRIMARY KEY,
                         attribute_value TEXT,
@@ -149,7 +149,7 @@ public class Service
                     .Zip(elementsHtmlList, (attrValue, html) => new { AttributeValue = attrValue, HtmlContent = html })
                     .ToList();
 
-                connection.ExecuteAsync(
+                await connection.ExecuteAsync(
                     "INSERT INTO elements (attribute_value, html_content) VALUES (@AttributeValue, @HtmlContent)",
                     recordsToInsert);
             }
