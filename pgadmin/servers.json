@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "WebParser DB",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "webparser",
+      "Username": "postgres",
+      "SSLMode": "prefer",
+      "PassFile": "/pgpass"
+    }
+  }
+}

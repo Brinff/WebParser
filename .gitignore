@@ -3,5 +3,7 @@ obj/
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
-FilesForTest
+.idea/
 appsettings.Development.json
+.DS_Store
+Thumbs.db
