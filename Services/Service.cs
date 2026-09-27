@@ -120,6 +120,10 @@ public class Service
         response.ElementsCount = elementsAttrList.Count;
         response.ElementsAttrList = elementsAttrList;
         
+        var emailsList = EmailExtractor.ExtractEmails(decodedPage);
+        response.EmailsCount = emailsList.Count;
+        response.EmailsList = emailsList;
+        
         return Task.FromResult(response);
     }
 }
